@@ -1,0 +1,21 @@
+cat > backend/.gitignore << 'EOF'
+# Environment variables
+.env
+*.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+env/
+.venv/
+
+# Models (large files)
+*.pkl
+
+# IDE
+.vscode/
+.idea/
+EOF
