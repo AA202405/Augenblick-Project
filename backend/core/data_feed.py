@@ -61,7 +61,7 @@ def _load_reference_data():
 
         # Find icao24 column
         icao_col = next((c for c in ac.columns
-                         if "icao24" in c or c == "icao"), None)
+                         if "icao" in c.lower()), None)
 
         if icao_col:
             ac = ac.rename(columns={icao_col: "icao24"})
@@ -103,20 +103,44 @@ AIRLINE_ICAO_SET, FAA_TAIL_SET, AIRCRAFT_DB = _load_reference_data()
 # ── Load and replay opensky_raw.csv ──────────────────────────────────────────
 _raw_df: Optional[pd.DataFrame] = None
 _replay_idx: int = 0
-_BATCH_SIZE = 20  # objects per tick
+_BATCH_SIZE = 200  # objects per tick
 
 
 def _load_raw_csv() -> pd.DataFrame:
     global _raw_df
     if _raw_df is None:
         df = pd.read_csv(DATA_DIR / "opensky_raw.csv")
+
+        # Load and merge d1-d5 files
+        extra_dfs = []
+        for i in range(1, 6):
+            try:
+                ex = pd.read_csv(DATA_DIR / f"d{i}.csv")
+                ex = ex.rename(columns={
+                    "lat":         "latitude",
+                    "lon":         "longitude",
+                    "heading":     "true_track",
+                    "vertrate":    "vertical_rate",
+                    "baroaltitude":"baro_altitude",
+                    "geoaltitude": "geo_altitude",
+                    "onground":    "on_ground",
+                })
+                extra_dfs.append(ex)
+                print(f"[data_feed] Loaded {len(ex)} rows from d{i}.csv")
+            except Exception as e:
+                print(f"[data_feed] Could not load d{i}.csv: {e}")
+
+        if extra_dfs:
+            df = pd.concat([df] + extra_dfs, ignore_index=True)
+
         df = df[df["on_ground"] == False].copy()
         df = df.dropna(subset=["latitude", "longitude", "baro_altitude", "velocity"])
-        df["velocity"]       = pd.to_numeric(df["velocity"],       errors="coerce").fillna(0)
-        df["true_track"]     = pd.to_numeric(df["true_track"],     errors="coerce").fillna(0)
-        df["vertical_rate"]  = pd.to_numeric(df["vertical_rate"],  errors="coerce").fillna(0)
-        df["baro_altitude"]  = pd.to_numeric(df["baro_altitude"],  errors="coerce").fillna(0)
+        df["velocity"]      = pd.to_numeric(df["velocity"],      errors="coerce").fillna(0)
+        df["true_track"]    = pd.to_numeric(df["true_track"],    errors="coerce").fillna(0)
+        df["vertical_rate"] = pd.to_numeric(df["vertical_rate"], errors="coerce").fillna(0)
+        df["baro_altitude"] = pd.to_numeric(df["baro_altitude"], errors="coerce").fillna(0)
         _raw_df = df.reset_index(drop=True)
+        print(f"[data_feed] Total replay rows: {len(_raw_df)}")
     return _raw_df
 
 
