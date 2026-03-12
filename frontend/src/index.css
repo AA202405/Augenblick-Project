@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-950 text-gray-100 font-sans;
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { @apply bg-gray-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-600 rounded; }
+}
+
+@layer components {
+  .panel {
+    @apply bg-gray-900 border border-gray-700 rounded-xl overflow-hidden;
+  }
+  .panel-header {
+    @apply px-4 py-3 border-b border-gray-700 flex items-center justify-between;
+  }
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold;
+  }
+  .badge-low      { @apply bg-green-900 text-green-300; }
+  .badge-medium   { @apply bg-yellow-900 text-yellow-300; }
+  .badge-high     { @apply bg-orange-900 text-orange-300; }
+  .badge-critical { @apply bg-red-900 text-red-300 animate-pulse-fast; }
+}
+
+/* Leaflet overrides */
+.leaflet-container { background: #111827 !important; }
+.leaflet-tile-pane { filter: brightness(0.85) saturate(0.7); }
