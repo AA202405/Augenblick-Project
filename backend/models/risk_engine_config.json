@@ -1,0 +1,103 @@
+{
+  "base_weights": {
+    "zone_proximity": 0.3,
+    "anomaly_score": 0.25,
+    "speed_deviation": 0.15,
+    "no_transponder": 0.15,
+    "trajectory_intercept_prob": 0.15
+  },
+  "class_weights": {
+    "drone": {
+      "zone_proximity": 0.35,
+      "anomaly_score": 0.25,
+      "speed_deviation": 0.1,
+      "no_transponder": 0.2,
+      "trajectory_intercept_prob": 0.1
+    },
+    "civilian_aircraft": {
+      "zone_proximity": 0.25,
+      "anomaly_score": 0.2,
+      "speed_deviation": 0.2,
+      "no_transponder": 0.1,
+      "trajectory_intercept_prob": 0.25
+    },
+    "bird": {
+      "zone_proximity": 0.2,
+      "anomaly_score": 0.3,
+      "speed_deviation": 0.2,
+      "no_transponder": 0.05,
+      "trajectory_intercept_prob": 0.25
+    },
+    "unknown": {
+      "zone_proximity": 0.3,
+      "anomaly_score": 0.2,
+      "speed_deviation": 0.1,
+      "no_transponder": 0.3,
+      "trajectory_intercept_prob": 0.1
+    }
+  },
+  "class_avg_speeds": {
+    "civilian_aircraft": 360.25,
+    "drone": 34.27,
+    "bird": 8.0,
+    "unknown": 38.28
+  },
+  "thresholds": {
+    "LOW": [
+      0,
+      30
+    ],
+    "MEDIUM": [
+      31,
+      60
+    ],
+    "HIGH": [
+      61,
+      80
+    ],
+    "CRITICAL": [
+      81,
+      100
+    ]
+  },
+  "hard_rules": [
+    {
+      "name": "Restricted Zone Entry",
+      "forced_level": "CRITICAL",
+      "description": "Object inside a restricted zone"
+    },
+    {
+      "name": "Unknown + No Transponder",
+      "forced_level": "CRITICAL",
+      "description": "Unidentified object with no transponder signal"
+    },
+    {
+      "name": "Abrupt Altitude Drop",
+      "forced_level": "HIGH",
+      "description": "Altitude drop >200m flagged by anomaly detector"
+    },
+    {
+      "name": "Erratic Heading",
+      "forced_level": "HIGH",
+      "description": "Heading change >90\u00b0 between ticks"
+    },
+    {
+      "name": "Intercept Trajectory",
+      "forced_level": "HIGH",
+      "description": "Object on collision intercept path with another object"
+    }
+  ],
+  "restricted_zones": [
+    {
+      "id": "R-01",
+      "name": "NYC Metro Zone",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "R-02",
+      "name": "LA Restricted Corridor",
+      "severity": "CRITICAL"
+    }
+  ],
+  "generated_at": "2026-03-12T05:37:04.726583Z"
+}
