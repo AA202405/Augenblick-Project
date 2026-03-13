@@ -1,20 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAirspaceStore } from './store/airspaceStore'
 import { useWebSocket } from './hooks/useWebSocket'
-import { useVoice } from './hooks/useVoice'
-import { isInRegion } from './lib/regionBounds'
 
-import StatusBar    from './components/StatusBar'
-import AirspaceMap  from './components/Map'
-import ObjectPanel  from './components/ObjectPanel'
-import AlertFeed    from './components/AlertFeed'
-import Charts       from './components/Charts'
-import AIAssistant  from './components/AIAssistant'
-import LoginPage    from './components/LoginModal'
+import StatusBar   from './components/StatusBar'
+import AirspaceMap from './components/Map'
+import ObjectPanel from './components/ObjectPanel'
+import AlertFeed   from './components/AlertFeed'
+import Charts      from './components/Charts'
+import AIAssistant from './components/AIAssistant'
+import HomePage    from './components/HomePage'
 import RegionPicker from './components/RegionPicker'
-import HomePage     from './components/HomePage'
 
-import { Plane, Bell, Activity, Bot, LogOut, MapPin } from 'lucide-react'
+import { Plane, Bell, Activity, Bot, MapPin } from 'lucide-react'
 
 const TABS = [
   { id: 'objects', label: 'Objects', icon: Plane    },
@@ -25,102 +22,82 @@ const TABS = [
 
 export default function App() {
   const {
-    token, clearToken,
     activePanel, setActivePanel,
-    activeRegion,
-    objects,
+    activeRegion, setActiveRegion,
+    showHome, setShowHome,
   } = useAirspaceStore()
 
-  const { speakAlert } = useVoice()
-  const prevObjectsRef = useRef({})
+  // Always connect WebSocket — no auth needed
+  useWebSocket()
 
-  // Home page is shown first; dismissed permanently once operator clicks ACCESS SYSTEM
-  const [showHome, setShowHome] = useState(true)
-
-  useWebSocket(token && activeRegion)
-
-  // Voice alerts — only for objects inside the active region
-  useEffect(() => {
-    if (!token || !activeRegion) return
-    objects.forEach(obj => {
-      // Skip objects outside the active region
-      if (!isInRegion(obj.lat, obj.lon, activeRegion)) return
-
-      const prev  = prevObjectsRef.current[obj.object_id]
-      const level = obj.risk_level
-      if ((level === 'CRITICAL' || level === 'HIGH') && prev?.risk_level !== level) {
-        speakAlert(obj)
-      }
-    })
-    const map = {}
-    objects.forEach(o => { map[o.object_id] = o })
-    prevObjectsRef.current = map
-  }, [objects, speakAlert, token, activeRegion])
-
-  // Home page flow: HomePage → LoginPage → RegionPicker → Dashboard
+  // Show home page on first load
   if (showHome) {
     return (
       <HomePage onEnter={(preselectedRegion) => {
         setShowHome(false)
-        // If user picked a region on the home page AND is already logged in + has no region set,
-        // pre-select it in the store so RegionPicker is skipped.
-        // We DON'T set it if they're not logged in — RegionPicker will handle it after login.
-        if (preselectedRegion && token && !activeRegion) {
-          useAirspaceStore.getState().setActiveRegion(preselectedRegion)
+        if (preselectedRegion) {
+          setActiveRegion(preselectedRegion)
         }
       }} />
     )
   }
 
-  if (!token)        return <LoginPage />
-  if (!activeRegion) return <RegionPicker />
+  // If no region chosen yet, show picker
+  if (!activeRegion) {
+    return <RegionPicker />
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-950">
 
-      {/* Top bar */}
-      <header className="h-12 bg-gray-900 border-b border-gray-700 flex items-center justify-between px-4 flex-shrink-0">
+      {/* ── TOP HEADER ── */}
+      <header className="h-11 bg-gray-900/95 border-b border-gray-700/60 flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-blue-700 rounded-lg flex items-center justify-center">
-            <Plane size={14} />
+          <div className="w-7 h-7 bg-blue-700 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Plane size={13} className="text-white" />
           </div>
-          <span className="font-bold text-sm text-gray-100 tracking-wide">
+          <span className="font-bold text-sm text-gray-100 tracking-widest">
             AIRSPACE MONITOR
           </span>
-          <span className="text-xs text-gray-600 hidden sm:block">
-            Maharashtra · Goa · Karnataka · Telangana · Gujarat
+          <span className="text-xs text-gray-600 hidden md:block">
+            Maharashtra · Goa · Telangana · Gujarat · Delhi/NCR
           </span>
         </div>
+
         <div className="flex items-center gap-3">
           <button
-            onClick={() => useAirspaceStore.getState().setActiveRegion(null)}
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            onClick={() => setActiveRegion(null)}
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-200 transition-colors"
             title="Change region"
           >
-            <MapPin size={13} />
+            <MapPin size={12} />
             <span className="hidden sm:block">Region</span>
           </button>
           <button
-            onClick={clearToken}
-            className="text-gray-500 hover:text-gray-300 transition-colors"
-            title="Logout"
+            onClick={() => setShowHome(true)}
+            className="text-xs text-gray-600 hover:text-gray-300 transition-colors px-2 py-1 rounded border border-gray-700/60 hover:border-gray-600"
           >
-            <LogOut size={15} />
+            ⌂ Home
           </button>
         </div>
       </header>
 
+      {/* ── STATUS BAR ── */}
       <StatusBar />
 
+      {/* ── MAIN LAYOUT ── */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Map */}
+
+        {/* Map — takes all remaining width */}
         <div className="flex-1 p-2 overflow-hidden min-w-0">
           <AirspaceMap />
         </div>
 
         {/* Right sidebar */}
-        <div className="w-72 flex flex-col border-l border-gray-800 flex-shrink-0">
-          <div className="flex border-b border-gray-700 flex-shrink-0">
+        <div className="w-72 flex flex-col border-l border-gray-700/60 flex-shrink-0 bg-gray-950">
+
+          {/* Tab bar */}
+          <div className="flex border-b border-gray-700/60 flex-shrink-0">
             {TABS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -130,18 +107,20 @@ export default function App() {
                     ? 'text-blue-400 border-b-2 border-blue-500 bg-gray-900/50'
                     : 'text-gray-500 hover:text-gray-300'}`}
               >
-                <Icon size={13} />
+                <Icon size={12} />
                 <span className="mt-0.5">{label}</span>
               </button>
             ))}
           </div>
 
-          <div className="flex-1 overflow-hidden p-2">
+          {/* Panel content */}
+          <div className="flex-1 overflow-hidden">
             {activePanel === 'objects' && <ObjectPanel />}
             {activePanel === 'alerts'  && <AlertFeed />}
             {activePanel === 'charts'  && <Charts />}
             {activePanel === 'agent'   && <AIAssistant />}
           </div>
+
         </div>
       </div>
     </div>

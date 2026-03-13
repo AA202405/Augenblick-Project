@@ -36,23 +36,29 @@ def _score_to_level(score: float) -> str:
 
 def _zone_proximity(lat: float, lon: float) -> float:
     """Returns proximity score [0-1]. 1.0 = inside zone."""
-    cfg = _load_config()
-    zones = cfg.get("restricted_zones", [])
-    # Hard-coded zone boundaries (matching anomaly notebook + config)
-    ZONE_BOUNDS = {
-        "R-01": {"lat": (40.0, 41.0), "lon": (-75.0, -74.0)},
-        "R-02": {"lat": (34.0, 35.0), "lon": (-118.5, -117.5)},
-    }
-    for zid, bounds in ZONE_BOUNDS.items():
+    ZONE_BOUNDS = [
+        {"lat": (18.9,  19.3),  "lon": (72.7, 73.1)},   # Mumbai TMA
+        {"lat": (28.4,  28.8),  "lon": (76.9, 77.3)},   # Delhi TMA
+        {"lat": (15.2,  15.6),  "lon": (73.8, 74.2)},   # Goa Naval
+        {"lat": (17.2,  17.6),  "lon": (78.2, 78.6)},   # Hyderabad ATC
+        {"lat": (22.9,  23.3),  "lon": (72.4, 72.8)},   # Ahmedabad TMA
+        {"lat": (28.58, 28.65), "lon": (77.18, 77.25)},  # Delhi VVIP
+        {"lat": (28.54, 28.58), "lon": (77.07, 77.14)},  # Palam AFB
+        {"lat": (18.93, 18.99), "lon": (72.80, 72.88)},  # Mumbai TCA inner
+        {"lat": (15.38, 15.46), "lon": (73.82, 73.92)},  # INS Hansa
+        {"lat": (17.52, 17.58), "lon": (78.52, 78.60)},  # Hakimpet AFS
+        {"lat": (23.04, 23.08), "lon": (72.61, 72.68)},  # Ahmedabad TCA
+    ]
+    centroids = [
+        (19.1, 72.9), (28.6, 77.1), (15.4, 74.0),
+        (17.4, 78.4), (23.1, 72.6)
+    ]
+    for bounds in ZONE_BOUNDS:
         if (bounds["lat"][0] <= lat <= bounds["lat"][1] and
                 bounds["lon"][0] <= lon <= bounds["lon"][1]):
-            return 1.0  # inside zone
-
-    # Distance to nearest zone centroid
-    centroids = [(40.5, -74.5), (34.5, -118.0)]
-    min_d = min(((lat - c[0]) ** 2 + (lon - c[1]) ** 2) ** 0.5
-                for c in centroids)
-    return round(max(0.0, 1.0 - (min_d / 0.5)), 4)
+            return 1.0
+    min_d = min(((lat - c[0])**2 + (lon - c[1])**2)**0.5 for c in centroids)
+    return round(max(0.0, 1.0 - (min_d / 2.0)), 4)
 
 
 def _speed_deviation(velocity: float, object_class: str) -> float:

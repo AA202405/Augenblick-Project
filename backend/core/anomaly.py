@@ -43,8 +43,11 @@ FEATURE_COLS = [
 
 # Restricted zones (matching your notebook)
 RESTRICTED_ZONES = [
-    {"id": "R-01", "lat_min": 40.0, "lat_max": 41.0, "lon_min": -75.0, "lon_max": -74.0, "name": "NYC Metro Zone"},
-    {"id": "R-02", "lat_min": 34.0, "lat_max": 35.0, "lon_min": -118.5, "lon_max": -117.5, "name": "LA Restricted Corridor"},
+    {"id": "RZ-MUM", "lat_min": 18.9,  "lat_max": 19.3,  "lon_min": 72.7, "lon_max": 73.1,  "name": "Mumbai TMA"},
+    {"id": "RZ-DEL", "lat_min": 28.4,  "lat_max": 28.8,  "lon_min": 76.9, "lon_max": 77.3,  "name": "Delhi TMA"},
+    {"id": "RZ-GOA", "lat_min": 15.2,  "lat_max": 15.6,  "lon_min": 73.8, "lon_max": 74.2,  "name": "Goa Naval Airspace"},
+    {"id": "RZ-HYD", "lat_min": 17.2,  "lat_max": 17.6,  "lon_min": 78.2, "lon_max": 78.6,  "name": "Hyderabad ATC Zone"},
+    {"id": "RZ-AMD", "lat_min": 22.9,  "lat_max": 23.3,  "lon_min": 72.4, "lon_max": 72.8,  "name": "Ahmedabad TMA"},
 ]
 
 # Per-object rolling history (last 5 snapshots for derivative features)

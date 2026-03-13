@@ -4,29 +4,244 @@
 
 @layer base {
   body {
-    @apply bg-gray-950 text-gray-100 font-sans;
+    @apply bg-gray-950 text-gray-100;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
   }
-  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { @apply bg-gray-900; }
   ::-webkit-scrollbar-thumb { @apply bg-gray-600 rounded; }
 }
 
 @layer components {
   .panel {
-    @apply bg-gray-900 border border-gray-700 rounded-xl overflow-hidden;
+    @apply bg-gray-900 border border-gray-700/60 rounded-xl overflow-hidden;
   }
   .panel-header {
-    @apply px-4 py-3 border-b border-gray-700 flex items-center justify-between;
+    @apply px-3 py-2.5 border-b border-gray-700/60 flex items-center justify-between;
   }
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold;
+    @apply inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold tracking-wide;
   }
-  .badge-low      { @apply bg-green-900 text-green-300; }
-  .badge-medium   { @apply bg-yellow-900 text-yellow-300; }
-  .badge-high     { @apply bg-orange-900 text-orange-300; }
-  .badge-critical { @apply bg-red-900 text-red-300 animate-pulse-fast; }
 }
 
-/* Leaflet overrides */
-.leaflet-container { background: #111827 !important; }
-.leaflet-tile-pane { filter: brightness(0.85) saturate(0.7); }
+/* ── Leaflet tile: crisp, dark-teal Google Maps-like theme ─────────────────── */
+.leaflet-container {
+  background: #1a2332 !important;
+  font-family: inherit;
+  cursor: grab !important;
+}
+.leaflet-container:active {
+  cursor: grabbing !important;
+}
+
+/* Dark map tiles — genuine dark mode, not whitewashed */
+.leaflet-tile-pane {
+  filter: brightness(0.88) contrast(1.1) saturate(0.9);
+}
+
+/* Zoom control — Google Maps style */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  margin-right: 14px !important;
+  margin-bottom: 14px !important;
+}
+.leaflet-control-zoom a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  color: #94a3b8 !important;
+  font-size: 18px !important;
+  font-weight: 300 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(51,65,85,0.6) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.leaflet-control-zoom a:last-child {
+  border-bottom: none !important;
+}
+.leaflet-control-zoom a:hover {
+  background: rgba(30, 58, 138, 0.7) !important;
+  color: #60a5fa !important;
+}
+
+/* Attribution — hidden */
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+/* Smooth tile loading */
+.leaflet-tile {
+  transition: opacity 0.2s ease;
+}
+
+/* Popup styling — clean dark card */
+.leaflet-popup-content-wrapper {
+  background: rgba(10, 15, 30, 0.97) !important;
+  border: 1px solid rgba(51,65,85,0.8) !important;
+  border-radius: 12px !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.1) !important;
+  backdrop-filter: blur(8px);
+  padding: 0 !important;
+}
+.leaflet-popup-tip-container {
+  margin-top: -1px;
+}
+.leaflet-popup-tip {
+  background: rgba(10, 15, 30, 0.97) !important;
+  box-shadow: none !important;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.5;
+}
+.leaflet-popup-close-button {
+  color: #64748b !important;
+  font-size: 18px !important;
+  padding: 6px 8px !important;
+  top: 4px !important;
+  right: 4px !important;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.leaflet-popup-close-button:hover {
+  color: #e2e8f0 !important;
+  background: rgba(51,65,85,0.4) !important;
+}
+
+/* Risk-level popup borders */
+.p-crit .leaflet-popup-content-wrapper {
+  border: 1.5px solid rgba(239,68,68,0.7) !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 20px rgba(239,68,68,0.25) !important;
+}
+.p-crit .leaflet-popup-tip { background: #ef4444 !important; }
+
+.p-high .leaflet-popup-content-wrapper {
+  border: 1.5px solid rgba(249,115,22,0.7) !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 14px rgba(249,115,22,0.2) !important;
+}
+.p-high .leaflet-popup-tip { background: #f97316 !important; }
+
+.p-focus .leaflet-popup-content-wrapper {
+  border: 1.5px solid rgba(59,130,246,0.8) !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 22px rgba(59,130,246,0.3) !important;
+}
+.p-focus .leaflet-popup-tip { background: #3b82f6 !important; }
+
+/* ── Marker pulse animations ──────────────────────────────────────────────── */
+@keyframes _critRing {
+  0%  { box-shadow: 0 0 0 0 rgba(239,68,68,0.9), 0 0 8px rgba(239,68,68,0.6); }
+  70% { box-shadow: 0 0 0 14px rgba(239,68,68,0), 0 0 8px rgba(239,68,68,0.6); }
+  100%{ box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+@keyframes _highRing {
+  0%  { box-shadow: 0 0 0 0 rgba(249,115,22,0.8), 0 0 6px rgba(249,115,22,0.5); }
+  70% { box-shadow: 0 0 0 11px rgba(249,115,22,0), 0 0 6px rgba(249,115,22,0.5); }
+  100%{ box-shadow: 0 0 0 0 rgba(249,115,22,0); }
+}
+@keyframes _focusRing {
+  0%  { box-shadow: 0 0 0 0 rgba(96,165,250,0.9), 0 0 14px rgba(96,165,250,0.7); }
+  70% { box-shadow: 0 0 0 18px rgba(96,165,250,0), 0 0 14px rgba(96,165,250,0.7); }
+  100%{ box-shadow: 0 0 0 0 rgba(96,165,250,0); }
+}
+.m-crit  { animation: _critRing  0.85s ease-out infinite !important; }
+.m-high  { animation: _highRing  1.20s ease-out infinite !important; }
+.m-focus { animation: _focusRing 1.00s ease-out infinite !important; }
+
+/* ── Object labels ────────────────────────────────────────────────────────── */
+.obj-label {
+  position: absolute;
+  top: -18px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(5, 10, 20, 0.88);
+  color: #e2e8f0;
+  font-size: 8px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  border: 1px solid rgba(51,65,85,0.5);
+  letter-spacing: 0.04em;
+}
+
+/* ── Hover tooltip ────────────────────────────────────────────────────────── */
+.obj-hover-tip {
+  position: absolute;
+  bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(5, 10, 22, 0.95);
+  color: #e2e8f0;
+  font-size: 10px;
+  font-family: monospace;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  border: 1px solid rgba(99,102,241,0.35);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+.obj-hover-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(99,102,241,0.35);
+}
+
+/* ── Trajectory step labels ───────────────────────────────────────────────── */
+.traj-label {
+  background: rgba(10, 17, 40, 0.92);
+  color: #93c5fd;
+  font-size: 9px;
+  font-family: 'SF Mono', monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(59,130,246,0.4);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  letter-spacing: 0.02em;
+}
+
+/* ── Zone tooltip ─────────────────────────────────────────────────────────── */
+.leaflet-tooltip {
+  background: rgba(10,15,30,0.95) !important;
+  border: 1px solid rgba(51,65,85,0.7) !important;
+  color: #e2e8f0 !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+}
+.leaflet-tooltip-top::before {
+  border-top-color: rgba(51,65,85,0.7) !important;
+}
+
+/* ── Scale bar ────────────────────────────────────────────────────────────── */
+.leaflet-control-scale-line {
+  background: rgba(10,15,30,0.85) !important;
+  border: 1px solid rgba(51,65,85,0.7) !important;
+  border-top: none !important;
+  color: #64748b !important;
+  font-size: 9px !important;
+  font-family: monospace;
+  padding: 1px 5px;
+}
+
+/* ── Ticker / boot animations ─────────────────────────────────────────────── */
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker-track { animation: ticker 44s linear infinite; display: inline-block; white-space: nowrap; }
+@keyframes bootblink { 0%,100%{opacity:1} 50%{opacity:0} }
+.boot-cursor { animation: bootblink 1s step-end infinite; }
+@keyframes animate-flash { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.animate-flash { animation: animate-flash 0.6s ease-in-out infinite; }
